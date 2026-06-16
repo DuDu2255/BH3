@@ -34,54 +34,54 @@ jobs:
         with:
           dotnet-version: 8.0.x
 
-      # 3. 还原依赖 (在 BH3 目录下执行)
+      # 3. 进入 BH3 目录，准备构建
+      - name: Change to project directory
+        run: cd BH3
+
+      # 4. 还原依赖 (针对 Program.csproj)
       - name: Restore dependencies
         working-directory: ./BH3
-        run: dotnet restore KianaBH/KianaBH.sln
+        run: dotnet restore KianaBH/Program/Program.csproj
 
-      # 4. 编译并发布 Windows x64 (单文件，无运行时)
+      # 5. 编译并发布 Windows x64 (单文件，无运行时)
       - name: Publish win-x64
         working-directory: ./BH3
         run: |
           dotnet publish KianaBH/Program/Program.csproj \
-            -c Release \
-            -r win-x64 \
-            --self-contained true \
+            --configuration Release \
+            --runtime win-x64 \
+            --self-contained false \
             -p:PublishSingleFile=true \
-            -p:IncludeNativeLibrariesForSelfExtract=true \
             -p:PublishTrimmed=true \
-            -o ../publish/win-x64
+            -o ./publish/win-x64
 
-      # 5. 编译并发布 Linux x64
+      # 6. 编译并发布 Linux x64
       - name: Publish linux-x64
         working-directory: ./BH3
         run: |
           dotnet publish KianaBH/Program/Program.csproj \
-            -c Release \
-            -r linux-x64 \
-            --self-contained true \
+            --configuration Release \
+            --runtime linux-x64 \
+            --self-contained false \
             -p:PublishSingleFile=true \
-            -p:IncludeNativeLibrariesForSelfExtract=true \
             -p:PublishTrimmed=true \
-            -o ../publish/linux-x64
+            -o ./publish/linux-x64
 
-      # 6. 编译并发布 macOS x64
-      - name: Publish osx-x64
+      # 7. 编译并发布 Linux ARM64
+      - name: Publish linux-arm64
         working-directory: ./BH3
         run: |
           dotnet publish KianaBH/Program/Program.csproj \
-            -c Release \
-            -r osx-x64 \
-            --self-contained true \
+            --configuration Release \
+            --runtime linux-arm64 \
+            --self-contained false \
             -p:PublishSingleFile=true \
-            -p:IncludeNativeLibrariesForSelfExtract=true \
             -p:PublishTrimmed=true \
-            -o ../publish/osx-x64
+            -o ./publish/linux-arm64
 
-      # 7. 上传所有平台的构建产物
+      # 8. 上传构建产物
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: BH3-Server-Builds
-          path: ./publish
-          retention-days: 7
+          name: KianaBH3-Build
+          path: BH3/publish/**/*
