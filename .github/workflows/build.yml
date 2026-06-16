@@ -1,0 +1,86 @@
+name: .NET Build (KianaBH3)
+
+permissions:
+  actions: write
+  contents: write
+
+on:
+  push:
+    branches: [ "clubfight" ]
+    paths:
+      - "**.cs"
+      - "**.csproj"
+      - "**.sln"
+  pull_request:
+    branches: [ "clubfight" ]
+    paths:
+      - "**.cs"
+      - "**.csproj"
+      - "**.sln"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore dependencies
+        run: dotnet restore KianaBH/KianaBH3.csproj
+
+      # ===== Windows x64 =====
+      - name: Publish win-x64
+        run: |
+          dotnet publish KianaBH/Program/Program.csproj \
+            -c Release \
+            -r win-x64 \
+            --self-contained true \
+            -p:PublishSingleFile=true \
+            -o Release/win-x64
+
+      # ===== Linux x64 =====
+      - name: Publish linux-x64
+        run: |
+          dotnet publish KianaBH/Program/Program.csproj \
+            -c Release \
+            -r linux-x64 \
+            --self-contained true \
+            -p:PublishSingleFile=true \
+            -o Release/linux-x64
+
+      # ===== Linux ARM64 =====
+      - name: Publish linux-arm64
+        run: |
+          dotnet publish KianaBH/Program/Program.csproj \
+            -c Release \
+            -r linux-arm64 \
+            --self-contained true \
+            -p:PublishSingleFile=true \
+            -o Release/linux-arm64
+
+      # ===== Artifacts =====
+      - name: Upload win-x64
+        uses: actions/upload-artifact@v4
+        with:
+          name: BH3-win-x64
+          path: Release/win-x64
+
+      - name: Upload linux-x64
+        uses: actions/upload-artifact@v4
+        with:
+          name: BH3-linux-x64
+          path: Release/linux-x64
+
+      - name: Upload linux-arm64
+        uses: actions/upload-artifact@v4
+        with:
+          name: BH3-linux-arm64
+          path: Release/linux-arm64
+
