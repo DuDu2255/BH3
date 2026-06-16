@@ -34,37 +34,34 @@ jobs:
         with:
           dotnet-version: 8.0.x
 
-      # 3. 使用绝对路径切换到项目目录
+      # 3. 直接进入项目目录 (因为代码已经在 $GITHUB_WORKSPACE 了)
       - name: Change to project directory
-        run: cd $GITHUB_WORKSPACE/KianaBH
+        run: |
+          echo "当前工作目录: $(pwd)"
+          echo "查找 KianaBH 目录..."
+          ls -la
+          cd KianaBH
+          echo "进入 KianaBH 后的目录: $(pwd)"
+          ls -la
 
-      # 4. 还原依赖 (现在在 KianaBH 目录下，直接 restore 解决方案)
+      # 4. 还原依赖 (在 KianaBH 目录下执行)
       - name: Restore dependencies
         run: dotnet restore KianaBH.sln
 
-      # 5. 发布项目 (根据你的目录结构，启动项目在 Program 文件夹下)
+      # 5. 发布项目 (使用相对路径)
       - name: Publish win-x64
-        run: |
-          dotnet publish $GITHUB_WORKSPACE/KianaBH/Program/Program.csproj \
-            -c Release -r win-x64 --self-contained false /p:PublishSingleFile=true
+        run: dotnet publish KianaBH/Program/Program.csproj -c Release -r win-x64 --self-contained false
 
       - name: Publish linux-x64
-        run: |
-          dotnet publish $GITHUB_WORKSPACE/KianaBH/Program/Program.csproj \
-            -c Release -r linux-x64 --self-contained false /p:PublishSingleFile=true
+        run: dotnet publish KianaBH/Program/Program.csproj -c Release -r linux-x64 --self-contained false
 
       - name: Publish linux-arm64
-        run: |
-          dotnet publish $GITHUB_WORKSPACE/KianaBH/Program/Program.csproj \
-            -c Release -r linux-arm64 --self-contained false /p:PublishSingleFile=true
+        run: dotnet publish KianaBH/Program/Program.csproj -c Release -r linux-arm64 --self-contained false
 
-      # 6. 上传构建产物
+      # 6. 上传产物
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: KianaBH3-Artifacts
-          path: |
-            KianaBH/Program/bin/Release/net8.0/win-x64/publish/*
-            KianaBH/Program/bin/Release/net8.0/linux-x64/publish/*
-            KianaBH/Program/bin/Release/net8.0/linux-arm64/publish/*
-          if-no-files-found: ignore
+          name: KianaBH3-Release
+          path: KianaBH/Program/bin/Release/net8.0/**/*
+          if-no-files-found: error
