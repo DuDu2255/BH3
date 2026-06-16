@@ -6,17 +6,7 @@ permissions:
 
 on:
   push:
-    branches: [ "clubfight" ]
-    paths:
-      - "**.cs"
-      - "**.csproj"
-      - "**.sln"
-  pull_request:
-    branches: [ "clubfight" ]
-    paths:
-      - "**.cs"
-      - "**.csproj"
-      - "**.sln"
+    branches: [ "main" ]
   workflow_dispatch:
 
 jobs:
@@ -24,44 +14,56 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. 拉取代码 (不指定 path，让代码直接在工作区根目录)
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2. 安装 .NET 8 SDK
-      - name: Setup .NET 8
+      - name: Setup .NET 8 SDK
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.0.x
+          dotnet-version: '8.0.x'
 
-      # 3. 直接进入项目目录 (因为代码已经在 $GITHUB_WORKSPACE 了)
-      - name: Change to project directory
-        run: |
-          echo "当前工作目录: $(pwd)"
-          echo "查找 KianaBH 目录..."
-          ls -la
-          cd KianaBH
-          echo "进入 KianaBH 后的目录: $(pwd)"
-          ls -la
-
-      # 4. 还原依赖 (在 KianaBH 目录下执行)
       - name: Restore dependencies
-        run: dotnet restore KianaBH.sln
+        run: dotnet restore
 
-      # 5. 发布项目 (使用相对路径)
+      # ===== Windows x64 =====
       - name: Publish win-x64
-        run: dotnet publish KianaBH/Program/Program.csproj -c Release -r win-x64 --self-contained false
+        run: |
+          dotnet publish \
+            -c Release \
+            -r win-x64 \
+            --self-contained true \
+            -o publish/win-x64
 
+      # ===== Linux x64 =====
       - name: Publish linux-x64
-        run: dotnet publish KianaBH/Program/Program.csproj -c Release -r linux-x64 --self-contained false
+        run: |
+          dotnet publish \
+            -c Release \
+            -r linux-x64 \
+            --self-contained true \
+            -o publish/linux-x64
 
+      # ===== Linux ARM64 =====
       - name: Publish linux-arm64
-        run: dotnet publish KianaBH/Program/Program.csproj -c Release -r linux-arm64 --self-contained false
+        run: |
+          dotnet publish \
+            -c Release \
+            -r linux-arm64 \
+            --self-contained true \
+            -o publish/linux-arm64
 
-      # 6. 上传产物
+      # ===== macOS x64 =====
+      - name: Publish osx-x64
+        run: |
+          dotnet publish \
+            -c Release \
+            -r osx-x64 \
+            --self-contained true \
+            -o publish/osx-x64
+
+      # ===== Upload =====
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: KianaBH3-Release
-          path: KianaBH/Program/bin/Release/net8.0/**/*
-          if-no-files-found: error
+          name: BH3-Server-Builds
+          path: publish/
