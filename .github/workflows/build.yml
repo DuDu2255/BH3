@@ -34,12 +34,14 @@ jobs:
         with:
           dotnet-version: 8.0.x
 
-      # 3. 还原依赖 (针对 sln 或根目录的 csproj)
+      # 3. 还原依赖 (在 BH3 目录下执行)
       - name: Restore dependencies
-        run: dotnet restore KianaBH/KianaBH3.csproj
+        working-directory: ./BH3
+        run: dotnet restore KianaBH/KianaBH.sln
 
       # 4. 编译并发布 Windows x64 (单文件，无运行时)
       - name: Publish win-x64
+        working-directory: ./BH3
         run: |
           dotnet publish KianaBH/Program/Program.csproj \
             -c Release \
@@ -47,14 +49,39 @@ jobs:
             --self-contained true \
             -p:PublishSingleFile=true \
             -p:IncludeNativeLibrariesForSelfExtract=true \
-            -p:PublishReadyToRun=true
-        env:
-          DOTNET_CLI_TELEMETRY_OPTOUT: 1
+            -p:PublishTrimmed=true \
+            -o ../publish/win-x64
 
-      # 5. 上传编译好的程序作为 Artifact
-      - name: Upload artifact
+      # 5. 编译并发布 Linux x64
+      - name: Publish linux-x64
+        working-directory: ./BH3
+        run: |
+          dotnet publish KianaBH/Program/Program.csproj \
+            -c Release \
+            -r linux-x64 \
+            --self-contained true \
+            -p:PublishSingleFile=true \
+            -p:IncludeNativeLibrariesForSelfExtract=true \
+            -p:PublishTrimmed=true \
+            -o ../publish/linux-x64
+
+      # 6. 编译并发布 macOS x64
+      - name: Publish osx-x64
+        working-directory: ./BH3
+        run: |
+          dotnet publish KianaBH/Program/Program.csproj \
+            -c Release \
+            -r osx-x64 \
+            --self-contained true \
+            -p:PublishSingleFile=true \
+            -p:IncludeNativeLibrariesForSelfExtract=true \
+            -p:PublishTrimmed=true \
+            -o ../publish/osx-x64
+
+      # 7. 上传所有平台的构建产物
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: BH3-Server-win-x64
-          path: KianaBH/Program/bin/Release/net8.0/win-x64/publish/*.exe
-          if-no-files-found: error
+          name: BH3-Server-Builds
+          path: ./publish
+          retention-days: 7
