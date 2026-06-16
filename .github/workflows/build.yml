@@ -24,18 +24,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1. 拉取代码
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # 2. 安装 .NET 8 SDK
       - name: Setup .NET 8
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
 
+      # 3. 还原依赖 (指定完整路径)
       - name: Restore dependencies
-        run: dotnet restore KianaBH/KianaBH3.csproj
+        run: dotnet restore KianaBH/KianaBH.csproj
 
-      # ===== Windows x64 =====
+      # 4. 编译并发布 Windows x64 (单文件)
       - name: Publish win-x64
         run: |
           dotnet publish KianaBH/Program/Program.csproj \
@@ -45,7 +48,7 @@ jobs:
             -p:PublishSingleFile=true \
             -o Release/win-x64
 
-      # ===== Linux x64 =====
+      # 5. 编译并发布 Linux x64
       - name: Publish linux-x64
         run: |
           dotnet publish KianaBH/Program/Program.csproj \
@@ -55,7 +58,7 @@ jobs:
             -p:PublishSingleFile=true \
             -o Release/linux-x64
 
-      # ===== Linux ARM64 =====
+      # 6. 编译并发布 Linux ARM64
       - name: Publish linux-arm64
         run: |
           dotnet publish KianaBH/Program/Program.csproj \
@@ -65,22 +68,40 @@ jobs:
             -p:PublishSingleFile=true \
             -o Release/linux-arm64
 
-      # ===== Artifacts =====
+      # 7. 编译并发布 macOS x64
+      - name: Publish osx-x64
+        run: |
+          dotnet publish KianaBH/Program/Program.csproj \
+            -c Release \
+            -r osx-x64 \
+            --self-contained true \
+            -p:PublishSingleFile=true \
+            -o Release/osx-x64
+
+      # 8. 上传 Windows 产物
       - name: Upload win-x64
         uses: actions/upload-artifact@v4
         with:
           name: BH3-win-x64
           path: Release/win-x64
 
+      # 9. 上传 Linux x64 产物
       - name: Upload linux-x64
         uses: actions/upload-artifact@v4
         with:
           name: BH3-linux-x64
           path: Release/linux-x64
 
+      # 10. 上传 Linux ARM64 产物
       - name: Upload linux-arm64
         uses: actions/upload-artifact@v4
         with:
           name: BH3-linux-arm64
           path: Release/linux-arm64
 
+      # 11. 上传 macOS 产物
+      - name: Upload osx-x64
+        uses: actions/upload-artifact@v4
+        with:
+          name: BH3-macos-x64
+          path: Release/osx-x64
