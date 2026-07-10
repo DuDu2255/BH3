@@ -1,12 +1,14 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <CETCompat>false</CETCompat>
+    <CETComp>false</CETComp>
     <RootNamespace>KianaBH</RootNamespace>
     <AssemblyName>KianaCommon</AssemblyName>
+
+    <!-- ✅ 支持 Android -->
+    <RuntimeIdentifiers>win-x64;linux-x64;linux-arm64</RuntimeIdentifiers>
   </PropertyGroup>
 
   <ItemGroup>
@@ -26,11 +28,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Proto\Proto.csproj" />
+    <ProjectReference Include="../Proto/Proto.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Data\Models\Dispatch\" />
   </ItemGroup>
-
 </Project>
