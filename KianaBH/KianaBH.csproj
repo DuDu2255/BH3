@@ -1,15 +1,18 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <CETCompat>false</CETCompat>
+    <CETComp>false</CETComp>
     <RootNamespace>KianaBH.KianaBH</RootNamespace>
     <AssemblyName>KianaBH</AssemblyName>
     <ApplicationIcon>Source\Kiana.ico</ApplicationIcon>
-	<SatelliteResourceLanguages>false</SatelliteResourceLanguages>
+    <SatelliteResourceLanguages>false</SatelliteResourceLanguages>
+
+    <!-- ✅ 关键：支持多平台（含 Android arm64） -->
+    <RuntimeIdentifiers>win-x64;linux-x64;linux-arm64</RuntimeIdentifiers>
+    <SelfContained>true</SelfContained>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,5 +20,4 @@
     <ProjectReference Include="..\GameServer\GameServer.csproj" />
     <ProjectReference Include="..\SdkServer\SdkServer.csproj" />
   </ItemGroup>
-
 </Project>
