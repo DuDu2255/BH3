@@ -1,13 +1,16 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Web">
-
+<Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
-    <CETCompat>false</CETCompat>
+    <CETComp>false</CETComp>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>KianaBH.SdkServer</RootNamespace>
     <OutputType>Library</OutputType>
     <AssemblyName>KianaSdkServer</AssemblyName>
+
+    <!-- ✅ 关键：支持 Windows / Linux / Android (ARM64) -->
+    <RuntimeIdentifiers>win-x64;linux-x64;linux-arm64</RuntimeIdentifiers>
+    <SelfContained>true</SelfContained>
   </PropertyGroup>
 
   <ItemGroup>
@@ -21,6 +24,9 @@
     <PackageReference Include="SqlSugarCore" Version="5.1.4.172" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="7.2.0" />
     <PackageReference Include="System.Management" Version="9.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Common\Common.csproj" />
     <ProjectReference Include="..\GameServer\GameServer.csproj" />
     <ProjectReference Include="..\Proto\Proto.csproj" />
