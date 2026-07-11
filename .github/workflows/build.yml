@@ -3,7 +3,6 @@ name: Build KianaBH3 Android (linux-arm64-zip)
 on:
   push:
     branches: [ main, master ]
-    tags: [ 'v*' ]          # ✅ 打 tag 才触发 Release
   workflow_dispatch:
 
 jobs:
@@ -18,8 +17,7 @@ jobs:
     - name: Checkout with submodules
       uses: actions/checkout@v4
       with:
-        submodules: recursive
-        fetch-tags: true     # ✅ 确保 tag 信息完整
+        submodules: recursive   # 必须，KianaBH3 有子模块
 
     - name: Setup .NET SDK
       uses: actions/setup-dotnet@v4
@@ -43,28 +41,36 @@ jobs:
         cd ${{ env.PUBLISH_DIR }}
         zip -r ../KianaBH3-Android-arm64.zip .
 
-    - name: Upload Artifact (ZIP)
+    # ===== 新增：创建并上传 Releases =====
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # 自动使用仓库的 token
+      with:
+        tag_name: v${{ github.run_number }}       # 生成版本号（如 v1, v2...）
+        release_name: KianaBH3 Android (v${{ github.run_number }})
+        body: |
+          🚀 Automated build for KianaBH3 Android (linux-arm64)
+          - Built on: ${{ github.event.repository.updated_at }}
+          - Commit: ${{ github.sha }}
+        draft: false
+        prerelease: false
+
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./publish/KianaBH3-Android-arm64.zip
+        asset_name: KianaBH3-Android-arm64.zip
+        asset_content_type: application/zip
+    # ===================================
+
+    - name: Upload Artifact (ZIP)  # 保留原有的 Artifact 上传（可选）
       uses: actions/upload-artifact@v4
       with:
         name: KianaBH3-Android-arm64
         path: ./publish/KianaBH3-Android-arm64.zip
         retention-days: 30
-
-    # ✅ 仅在 tag 时发布 Release
-    - name: Create GitHub Release
-      if: startsWith(github.ref, 'refs/tags/v')
-      uses: softprops/action-gh-release@v2
-      with:
-        tag_name: ${{ github.ref_name }}
-        name: KianaBH3 ${{ github.ref_name }} (Android arm64)
-        body: |
-          ### KianaBH3 Android (linux-arm64)
-
-          - Runtime: .NET 9 Self-contained
-          - Target: linux-arm64
-          - Build: ${{ github.ref_name }}
-
-          > 适用于 Android Termux / chroot / proot 环境
-        files: ./publish/KianaBH3-Android-arm64.zip
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
