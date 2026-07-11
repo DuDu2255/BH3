@@ -1,12 +1,9 @@
-name: Build KianaBH3 Android (linux-arm64)
+name: Build KianaBH3 Android (linux-arm64-zip)
 
 on:
   push:
     branches: [ main, master ]
-  workflow_dispatch:   # 允许手动触发
-  # 也可以取消下面两行，改为只在打 tag 时编译
-  # release:
-  #   types: [created]
+  workflow_dispatch:
 
 jobs:
   build:
@@ -14,14 +11,13 @@ jobs:
 
     env:
       DOTNET_VERSION: '9.0.x'
-      SOLUTION: KianaBH.sln
       PUBLISH_DIR: ./publish/linux-arm64
 
     steps:
     - name: Checkout with submodules
       uses: actions/checkout@v4
       with:
-        submodules: recursive   # ← 重要！KianaBH3 有 submodule
+        submodules: recursive   # 必须，KianaBH3 有子模块
 
     - name: Setup .NET SDK
       uses: actions/setup-dotnet@v4
@@ -29,7 +25,7 @@ jobs:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
     - name: Restore
-      run: dotnet restore ${{ env.SOLUTION }}
+      run: dotnet restore KianaBH.sln
 
     - name: Publish KianaBH (linux-arm64 self-contained)
       run: |
@@ -40,15 +36,14 @@ jobs:
           -o ${{ env.PUBLISH_DIR }} \
           --no-restore
 
-    - name: Package artifact
+    - name: Zip output
       run: |
         cd ${{ env.PUBLISH_DIR }}
-        tar czf ../KianaBH3-Android-arm64.tar.gz .
+        zip -r ../KianaBH3-Android-arm64.zip .
 
-    - name: Upload Artifact
+    - name: Upload Artifact (ZIP)
       uses: actions/upload-artifact@v4
       with:
         name: KianaBH3-Android-arm64
-        path: ./publish/KianaBH3-Android-arm64.tar.gz
+        path: ./publish/KianaBH3-Android-arm64.zip
         retention-days: 30
-
