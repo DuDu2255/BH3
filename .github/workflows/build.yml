@@ -3,6 +3,7 @@ name: Build KianaBH3 Android (linux-arm64-zip)
 on:
   push:
     branches: [ main, master ]
+    tags: [ 'v*' ]          # ✅ 打 tag 才触发 Release
   workflow_dispatch:
 
 jobs:
@@ -17,7 +18,8 @@ jobs:
     - name: Checkout with submodules
       uses: actions/checkout@v4
       with:
-        submodules: recursive   # 必须，KianaBH3 有子模块
+        submodules: recursive
+        fetch-tags: true     # ✅ 确保 tag 信息完整
 
     - name: Setup .NET SDK
       uses: actions/setup-dotnet@v4
@@ -47,3 +49,22 @@ jobs:
         name: KianaBH3-Android-arm64
         path: ./publish/KianaBH3-Android-arm64.zip
         retention-days: 30
+
+    # ✅ 仅在 tag 时发布 Release
+    - name: Create GitHub Release
+      if: startsWith(github.ref, 'refs/tags/v')
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: ${{ github.ref_name }}
+        name: KianaBH3 ${{ github.ref_name }} (Android arm64)
+        body: |
+          ### KianaBH3 Android (linux-arm64)
+
+          - Runtime: .NET 9 Self-contained
+          - Target: linux-arm64
+          - Build: ${{ github.ref_name }}
+
+          > 适用于 Android Termux / chroot / proot 环境
+        files: ./publish/KianaBH3-Android-arm64.zip
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
